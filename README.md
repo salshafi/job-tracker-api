@@ -1,4 +1,6 @@
-# Job Application Tracker API
+# Job Application Tracker API 
+
+![tests](https://github.com/salshafi/job-tracker-api/actions/workflows/tests.yml/badge.svg)
 
 A REST API for tracking job applications, built with FastAPI, SQLAlchemy and SQLite. You can save a posting, move it through the hiring stages, and filter your list by status.
 
