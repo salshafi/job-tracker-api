@@ -8,7 +8,9 @@ A REST API for tracking job applications, built with FastAPI, SQLAlchemy and SQL
 
 - Create, list, view, update and delete job applications
 - Five allowed statuses: `saved`, `applied`, `interview`, `offer`, `rejected`
-- Input validation with Pydantic (empty company/role and unknown statuses return `422`)
+- Input validation with Pydantic: empty or whitespace-only company/role, unknown statuses and invalid `job_url` values return `422`
+- Input clean-up: company and role are trimmed, and blank `notes` or `job_url` are stored as empty
+- CORS support so a browser front end (such as a React app) can call the API
 - Partial updates with `PATCH`: only the fields you send are changed
 - Filter the list by status, e.g. `GET /applications?status=applied`
 - Health check at `GET /health`
@@ -34,10 +36,10 @@ Python · FastAPI · SQLAlchemy 2 · SQLite · Pydantic · Uvicorn · pytest
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `company` | string | Required, 1–100 characters |
-| `role` | string | Required, 1–100 characters |
+| `company` | string | Required, 1–100 characters after trimming spaces |
+| `role` | string | Required, 1–100 characters after trimming spaces |
 | `status` | string | One of the five statuses. Defaults to `saved` |
-| `job_url` | string | Optional |
+| `job_url` | string | Optional. Must be an `http` or `https` link, up to 500 characters |
 | `date_applied` | date | Optional, `YYYY-MM-DD` |
 | `notes` | string | Optional |
 | `id`, `created_at` | | Set by the server |
@@ -63,7 +65,15 @@ Open http://127.0.0.1:8000/docs to try every endpoint in the browser. The SQLite
 pytest
 ```
 
-The tests cover create, defaults, validation errors, listing and filtering, partial updates, `404` handling and delete.
+The 18 tests cover create, defaults, validation errors (including whitespace-only text and bad URLs), input trimming, listing and filtering, partial updates, `404` handling, delete and CORS.
+
+## CORS
+
+By default the API accepts browser requests from the local Vite dev server (`http://localhost:5173` and `http://127.0.0.1:5173`). To allow a deployed front end, set the `CORS_ORIGINS` environment variable to a comma-separated list of origins before starting the server, for example:
+
+```bash
+CORS_ORIGINS=https://my-front-end.example.com uvicorn app.main:app
+```
 
 ## Project Structure
 
