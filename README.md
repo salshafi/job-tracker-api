@@ -10,6 +10,7 @@ A REST API for tracking job applications, built with FastAPI, SQLAlchemy and SQL
 - Five allowed statuses: `saved`, `applied`, `interview`, `offer`, `rejected`
 - Input validation with Pydantic: empty or whitespace-only company/role, unknown statuses and invalid `job_url` values return `422`
 - Input clean-up: company and role are trimmed, and blank `notes` or `job_url` are stored as empty
+- AI assistant endpoint (Gemini) that answers questions about your own applications
 - CORS support so a browser front end (such as a React app) can call the API
 - Partial updates with `PATCH`: only the fields you send are changed
 - Filter the list by status, e.g. `GET /applications?status=applied`
@@ -30,6 +31,7 @@ Python · FastAPI · SQLAlchemy 2 · SQLite · Pydantic · Uvicorn · pytest
 | GET | `/applications/{id}` | Get one application (`404` if missing) |
 | PATCH | `/applications/{id}` | Update only the fields sent |
 | DELETE | `/applications/{id}` | Delete an application (`204`) |
+| POST | `/assistant` | Ask the AI assistant a question about your applications. Body: `question` and optional `history` |
 | GET | `/health` | Service check |
 
 ### Application fields
@@ -65,7 +67,21 @@ Open http://127.0.0.1:8000/docs to try every endpoint in the browser. The SQLite
 pytest
 ```
 
-The 18 tests cover create, defaults, validation errors (including whitespace-only text and bad URLs), input trimming, listing and filtering, partial updates, `404` handling, delete and CORS.
+The 26 tests cover the assistant (with a fake Gemini, so no key or network is needed), create, defaults, validation errors (including whitespace-only text and bad URLs), input trimming, listing and filtering, partial updates, `404` handling, delete and CORS.
+
+## AI assistant
+
+`POST /assistant` sends your question, the recent chat and your application list to Google's Gemini API and returns the reply. Set these before starting the server:
+
+```powershell
+$env:GEMINI_API_KEY = "your-key"
+uvicorn app.main:app --reload
+```
+
+- `GEMINI_API_KEY` is required. Without it the endpoint returns `503` with a clear message. The key stays on the server and is never sent to the browser.
+- `GEMINI_MODEL` is optional and overrides the default model.
+- The prompt tells the model to use only the application list and to treat its text as data, not instructions.
+- Privacy: your company names, roles and notes are sent to Google when you ask a question. Do not put sensitive details in notes.
 
 ## CORS
 
@@ -84,8 +100,10 @@ app/
   models.py     # Application table (SQLAlchemy)
   schemas.py    # request/response validation (Pydantic)
   routes.py     # the /applications endpoints
+  assistant.py  # the /assistant endpoint (Gemini)
 tests/
   test_applications.py
+  test_assistant.py
 ```
 
 ## Notes

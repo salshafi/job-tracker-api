@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Imported so Base knows the Application table exists
 from app import models  # noqa: F401
 from app.database import Base, engine
+from app.assistant import router as assistant_router
 from app.routes import router
 
 # Create the tables in the database if they don't exist yet
@@ -32,6 +33,7 @@ app.add_middleware(
 
 # Add all the /applications endpoints to the app
 app.include_router(router)
+app.include_router(assistant_router)
 
 
 # Simple check that the service is running
