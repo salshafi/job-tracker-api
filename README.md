@@ -67,7 +67,7 @@ Open http://127.0.0.1:8000/docs to try every endpoint in the browser. The SQLite
 pytest
 ```
 
-The 26 tests cover the assistant (with a fake Gemini, so no key or network is needed), create, defaults, validation errors (including whitespace-only text and bad URLs), input trimming, listing and filtering, partial updates, `404` handling, delete and CORS.
+The 27 tests cover the assistant (with a fake Gemini, so no key or network is needed), create, defaults, validation errors (including whitespace-only text and bad URLs), input trimming, listing and filtering, partial updates, `404` handling, delete and CORS.
 
 ## AI assistant
 
